@@ -70,3 +70,6 @@ src/pages/content/printBridge/
 gemini-voyager-formal/
 
 .codegraph/
+
+# Scratch and local test outputs
+scratch/

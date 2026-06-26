@@ -1,18 +1,14 @@
-- [x] 收窄 `host_permissions`：移除 `<all_urls>`
-  - [x] 修改 `manifest.json` 移除 `"<all_urls>"`，改為明確域名列表，調整 `web_accessible_resources`
-  - [x] 修改 `manifest.dev.json` 與其同步
-- [x] 移除 MAIN World Fetch Interceptor（去浮水印功能）
-  - [x] 修改 `src/pages/background/index.ts` 使 `registerFetchInterceptor()` 為空操作
-  - [x] 修改 `manifest.json` 移除 `"fetchInterceptor.js"` 資源
-- [x] 加固遠端公告系統
-  - [x] 修改 `src/features/announcements/background.ts` 中 `DEFAULT_ANNOUNCEMENTS_URL` 為空，並在 `resolveFeed` 中加入 early return
-- [x] 加固遠端插件市場
-  - [x] 修改 `src/features/plugins/sources/MarketplacePluginSource.ts` 中 `DEFAULT_MARKETPLACE_URL` 為空，並在 `list()` 中加入 early return
-- [x] 停用 GitHub 版本檢查
-  - [x] 修改 `src/pages/content/prompt/index.ts` 停用呼叫 releases API，改為直接返回當前版本
-  - [x] 修改 `src/pages/popup/Popup.tsx` 停用 GitHub releases API 呼叫
-- [x] 替換 OAuth client_id
-  - [x] 修改 `manifest.json` 將 `oauth2.client_id` 改為佔位符
-- [x] 驗證與測試
-  - [x] 執行 `bun run test` (使用 `pnpm run test` 並全部通過)
-  - [x] 搜尋確認所有變更點符合預期
+# 任務進度追蹤 - gemini-voyager 測試與審查
+
+- [x] 重新編譯專案以確保 `dist_chrome/` 為最新狀態 (`pnpm run build`)
+- [x] 撰寫並優化 Playwright 自動化審查與載入測試腳本 (`scripts/automated_audit.js`)
+- [x] 安裝 Playwright 專用 Chromium 乾淨沙盒以避免 Profile 衝突
+- [x] 執行自動化側載與測試：
+  - [x] 驗證並截圖 Extension Popup 頁面
+  - [x] 驗證並截圖 Extension Options 頁面
+  - [x] 驗證並截圖 Google Gemini 首頁的 Content Script 注入
+- [x] 執行 Network Audit（網路行為審查）並生成報告：
+  - [x] 稽核所有 Outgoing 網路請求
+  - [x] 分類外部請求，核對白名單
+  - [x] 證實 Extension 核心界面與 background service 無任何殘餘外部請求
+- [x] 整理驗證報告並發布 `walkthrough.md`
