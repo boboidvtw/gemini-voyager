@@ -1383,6 +1383,8 @@ export default function Popup({ sourceTabId }: PopupProps = {}) {
     let cancelled = false;
 
     const fetchLatestVersion = async () => {
+      // Hardened: disable remote version check to prevent network requests
+      return;
       if (!extVersion) return;
 
       // Check for store installation (Chrome/Edge Web Store)

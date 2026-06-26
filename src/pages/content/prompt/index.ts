@@ -194,50 +194,7 @@ async function writeStorage<T>(key: StorageKey, value: T): Promise<void> {
 }
 
 async function getLatestVersionCached(): Promise<string | null> {
-  try {
-    if (!browser.runtime?.id) return null;
-
-    const now = Date.now();
-    const cache = await browser.storage.local.get(LATEST_VERSION_CACHE_KEY);
-    const cached = cache?.[LATEST_VERSION_CACHE_KEY] as
-      | { version?: string; fetchedAt?: number }
-      | undefined;
-    if (
-      cached &&
-      cached.version &&
-      cached.fetchedAt &&
-      now - cached.fetchedAt < LATEST_VERSION_MAX_AGE
-    ) {
-      return cached.version;
-    }
-
-    const resp = await fetch(
-      'https://api.github.com/repos/Nagi-ovo/gemini-voyager/releases/latest',
-      {
-        headers: { Accept: 'application/vnd.github+json' },
-      },
-    );
-    if (!resp.ok) {
-      throw new Error(`HTTP ${resp.status}`);
-    }
-
-    const data = await resp.json();
-    const candidate =
-      typeof data.tag_name === 'string'
-        ? data.tag_name
-        : typeof data.name === 'string'
-          ? data.name
-          : null;
-
-    if (candidate) {
-      await browser.storage.local.set({
-        [LATEST_VERSION_CACHE_KEY]: { version: candidate, fetchedAt: now },
-      });
-      return candidate;
-    }
-  } catch (error) {
-    pmLogger.debug('Latest version check failed', { error });
-  }
+  // Hardened: disable remote version check to prevent network requests
   return null;
 }
 

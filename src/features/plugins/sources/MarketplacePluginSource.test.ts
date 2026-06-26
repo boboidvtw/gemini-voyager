@@ -103,6 +103,7 @@ describe('MarketplacePluginSource', () => {
     });
     const fetchImpl = makeFetch({});
     const source = new MarketplacePluginSource({
+      catalogUrl: 'https://ex.com/marketplace.json',
       fetchImpl: fetchImpl as unknown as typeof fetch,
       ttlMs: 100000,
       now: () => 1500,

@@ -1,0 +1,18 @@
+- [x] 收窄 `host_permissions`：移除 `<all_urls>`
+  - [x] 修改 `manifest.json` 移除 `"<all_urls>"`，改為明確域名列表，調整 `web_accessible_resources`
+  - [x] 修改 `manifest.dev.json` 與其同步
+- [x] 移除 MAIN World Fetch Interceptor（去浮水印功能）
+  - [x] 修改 `src/pages/background/index.ts` 使 `registerFetchInterceptor()` 為空操作
+  - [x] 修改 `manifest.json` 移除 `"fetchInterceptor.js"` 資源
+- [x] 加固遠端公告系統
+  - [x] 修改 `src/features/announcements/background.ts` 中 `DEFAULT_ANNOUNCEMENTS_URL` 為空，並在 `resolveFeed` 中加入 early return
+- [x] 加固遠端插件市場
+  - [x] 修改 `src/features/plugins/sources/MarketplacePluginSource.ts` 中 `DEFAULT_MARKETPLACE_URL` 為空，並在 `list()` 中加入 early return
+- [x] 停用 GitHub 版本檢查
+  - [x] 修改 `src/pages/content/prompt/index.ts` 停用呼叫 releases API，改為直接返回當前版本
+  - [x] 修改 `src/pages/popup/Popup.tsx` 停用 GitHub releases API 呼叫
+- [x] 替換 OAuth client_id
+  - [x] 修改 `manifest.json` 將 `oauth2.client_id` 改為佔位符
+- [x] 驗證與測試
+  - [x] 執行 `bun run test` (使用 `pnpm run test` 並全部通過)
+  - [x] 搜尋確認所有變更點符合預期

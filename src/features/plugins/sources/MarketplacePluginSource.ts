@@ -29,8 +29,7 @@ import type { PluginManifest, PluginSource } from '../types';
 import { resolveStyleFileContributions } from './styleFiles';
 
 /** Remote Voyager marketplace mirror. Official core plugins are bundled locally. */
-export const DEFAULT_MARKETPLACE_URL =
-  'https://raw.githubusercontent.com/nagi-studio/voyager-plugins/main/marketplace.json';
+export const DEFAULT_MARKETPLACE_URL = '';
 
 interface CatalogEntry {
   readonly name?: string;
@@ -62,6 +61,9 @@ export class MarketplacePluginSource implements PluginSource {
   }
 
   async list(): Promise<readonly PluginManifest[]> {
+    if (!this.catalogUrl) {
+      return [];
+    }
     const cached = await loadCachedCatalog();
     if (cached && this.now() - cached.fetchedAt < this.ttlMs) {
       // Fresh — serve the cache and stay off the network entirely. An
@@ -88,6 +90,9 @@ export class MarketplacePluginSource implements PluginSource {
 
   /** Bypass the cache and fetch the catalog now (used by the "refresh" button). */
   async forceRefresh(): Promise<readonly PluginManifest[]> {
+    if (!this.catalogUrl) {
+      return [];
+    }
     try {
       return await this.refreshOnce();
     } catch (error) {

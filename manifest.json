@@ -27,11 +27,10 @@
   "permissions": ["storage", "identity", "scripting", "alarms"],
   "optional_permissions": ["notifications"],
   "oauth2": {
-    "client_id": "462948120910-vvunu0k3b4vi37u23mqnh77mbgdjcg78.apps.googleusercontent.com",
+    "client_id": "YOUR_OAUTH_CLIENT_ID",
     "scopes": ["https://www.googleapis.com/auth/drive.file"]
   },
   "host_permissions": [
-    "<all_urls>",
     "https://gemini.google.com/*",
     "https://business.gemini.google/*",
     "https://aistudio.google.com/*",
@@ -40,7 +39,9 @@
     "https://accounts.google.com/*",
     "https://*.googleusercontent.com/*",
     "https://lh3.google.com/*",
-    "https://*.ggpht.com/*"
+    "https://*.ggpht.com/*",
+    "https://claude.ai/*",
+    "https://chatgpt.com/*"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; worker-src 'self'"
@@ -73,14 +74,20 @@
         "icon-128.png",
         "icon-32.png",
         "katex-config.js",
-        "fetchInterceptor.js",
         "response-complete-observer.js",
         "usage-observer.js",
         "prevent-auto-scroll.js",
         "assets/*.js",
         "assets/*.png"
       ],
-      "matches": ["<all_urls>"]
+      "matches": [
+        "https://gemini.google.com/*",
+        "https://business.gemini.google/*",
+        "https://aistudio.google.com/*",
+        "https://aistudio.google.cn/*",
+        "https://claude.ai/*",
+        "https://chatgpt.com/*"
+      ]
     }
   ]
 }

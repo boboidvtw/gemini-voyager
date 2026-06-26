@@ -15,8 +15,7 @@ import type {
 } from './types';
 import { validateAnnouncementFeed } from './validate';
 
-export const DEFAULT_ANNOUNCEMENTS_URL =
-  'https://raw.githubusercontent.com/Nagi-ovo/gemini-voyager/main/docs/public/announcements.json';
+export const DEFAULT_ANNOUNCEMENTS_URL = '';
 export const REMOTE_ANNOUNCEMENTS_ALARM_NAME = 'gv-remote-announcements-check';
 
 const CHECK_INTERVAL_MINUTES = 6 * 60;
@@ -273,6 +272,9 @@ export class RemoteAnnouncementBackgroundService {
     now: number,
   ): Promise<{ feed: RemoteAnnouncementFeed | null; state: RemoteAnnouncementState }> {
     const state = await this.loadState();
+    if (!this.feedUrl) {
+      return { feed: null, state };
+    }
     if (state.cache && now - state.cache.fetchedAt < CHECK_INTERVAL_MS) {
       const nextState = { ...state, lastCheckedAt: now };
       await this.saveState(nextState);

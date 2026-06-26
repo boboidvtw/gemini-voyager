@@ -348,39 +348,12 @@ function filterForkNodesByRouteScope(
  * This allows intercepting fetch calls made by the page itself
  */
 async function registerFetchInterceptor(): Promise<void> {
-  if (!chrome.scripting?.registerContentScripts) return;
-
-  // The fetch interceptor only matters for the download path. Preview-time
-  // watermark removal happens in the content script and never touches fetch.
-  const result = await chrome.storage.sync.get([...WATERMARK_STORAGE_KEYS]);
-  const { download: downloadEnabled } = resolveWatermarkSettings(result);
-
-  try {
-    // Always unregister first to update settings
-    await chrome.scripting.unregisterContentScripts({ ids: [FETCH_INTERCEPTOR_SCRIPT_ID] });
-  } catch {
-    // No-op if script was not registered
-  }
-
-  if (!downloadEnabled) {
-    console.log('[Background] Fetch interceptor not registered (download path disabled)');
-    return;
-  }
-
-  try {
-    await chrome.scripting.registerContentScripts([
-      {
-        id: FETCH_INTERCEPTOR_SCRIPT_ID,
-        js: ['fetchInterceptor.js'],
-        matches: GEMINI_FETCH_INTERCEPTOR_MATCHES,
-        world: 'MAIN',
-        runAt: 'document_start',
-        persistAcrossSessions: true,
-      },
-    ]);
-    console.log('[Background] Fetch interceptor registered for MAIN world');
-  } catch (error) {
-    console.error('[Background] Failed to register fetch interceptor:', error);
+  if (chrome.scripting?.unregisterContentScripts) {
+    try {
+      await chrome.scripting.unregisterContentScripts({ ids: [FETCH_INTERCEPTOR_SCRIPT_ID] });
+    } catch {
+      // No-op
+    }
   }
 }
 
