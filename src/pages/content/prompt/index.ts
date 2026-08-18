@@ -15,8 +15,6 @@ import { type StorageKey, StorageKeys } from '@/core/types/common';
 import { isSafari, shouldShowSafariUpdateReminder } from '@/core/utils/browser';
 import { isExtensionContextInvalidatedError } from '@/core/utils/extensionContext';
 import { migrateFromLocalStorage } from '@/core/utils/storageMigration';
-import { shouldShowUpdateReminderForCurrentVersion } from '@/core/utils/updateReminder';
-import { compareVersions } from '@/core/utils/version';
 import { getCurrentLanguage, getTranslationSync, initI18n, setCachedLanguage } from '@/utils/i18n';
 import {
   APP_LANGUAGES,
@@ -79,8 +77,6 @@ const ID = {
   panel: 'gv-pm-panel',
 } as const;
 
-const LATEST_VERSION_CACHE_KEY = 'gvLatestVersionCache';
-const LATEST_VERSION_MAX_AGE = 1000 * 60 * 60 * 6; // 6 hours
 const SPONSOR_HEART_PATH_16 =
   'M7.655 14.916h-.002l-.006-.003l-.018-.01a22 22 0 0 1-3.744-2.584C2.045 10.731 0 8.35 0 5.5C0 2.836 2.086 1 4.25 1C5.797 1 7.153 1.802 8 3.02C8.847 1.802 10.203 1 11.75 1C13.914 1 16 2.836 16 5.5c0 2.85-2.044 5.231-3.886 6.818a22 22 0 0 1-3.433 2.414a7 7 0 0 1-.31.17l-.018.01l-.008.004a.75.75 0 0 1-.69 0';
 
@@ -191,11 +187,6 @@ async function writeStorage<T>(key: StorageKey, value: T): Promise<void> {
       errorDetails: result.error,
     });
   }
-}
-
-async function getLatestVersionCached(): Promise<string | null> {
-  // Hardened: disable remote version check to prevent network requests
-  return null;
 }
 
 function createEl<K extends keyof HTMLElementTagNameMap>(
@@ -635,32 +626,7 @@ export async function startPromptManager(): Promise<{ destroy: () => void }> {
     titleRow.appendChild(themeToggle);
     titleRow.appendChild(versionBadge);
 
-    // Check for newer version on GitHub (visual indicator only, no link)
-    (async () => {
-      const isSafariBrowser = isSafari();
-      const safariUpdateReminderEnabled = isSafariBrowser && shouldShowSafariUpdateReminder();
-
-      if (isSafariBrowser && !safariUpdateReminderEnabled) return;
-
-      const shouldShowUpdateNotification = shouldShowUpdateReminderForCurrentVersion({
-        currentVersion: currentVersionNormalized,
-        isSafariBrowser,
-        safariReminderEnabled: safariUpdateReminderEnabled,
-      });
-      if (!shouldShowUpdateNotification) return;
-
-      const latest = await getLatestVersionCached();
-      const latestNormalized = normalizeVersionString(latest);
-      const hasUpdate =
-        currentVersionNormalized && latestNormalized
-          ? compareVersions(latestNormalized, currentVersionNormalized) > 0
-          : false;
-
-      if (!hasUpdate || !latestNormalized) return;
-
-      versionBadge.classList.add('gv-pm-version-outdated');
-      versionBadge.title = `${i18n.t('latestVersionLabel')}: v${latestNormalized}`;
-    })();
+    // Hardened: disabled remote version check on GitHub
 
     const controls = createEl('div', 'gv-pm-controls');
 

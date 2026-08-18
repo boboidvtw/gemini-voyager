@@ -937,7 +937,7 @@ export default function Popup({ sourceTabId }: PopupProps = {}) {
         chrome.storage?.sync?.get(StorageKeys.ACCENT_COLORS, (res) => {
           if (!alive) return;
           const value = res?.[StorageKeys.ACCENT_COLORS];
-          setAccentColors(value && typeof value === 'object' ? value : {});
+          setAccentColors(value && typeof value === 'object' ? (value as Record<string, string>) : {});
         });
       } catch {
         /* storage unavailable */
@@ -1380,112 +1380,7 @@ export default function Popup({ sourceTabId }: PopupProps = {}) {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    const fetchLatestVersion = async () => {
-      // Hardened: disable remote version check to prevent network requests
-      return;
-      if (!extVersion) return;
-
-      // Check for store installation (Chrome/Edge Web Store)
-      // Store-installed extensions have an 'update_url' in the manifest.
-      // We skip manual version checks for these users to rely on store auto-updates
-      // and prevent confusing "new version" prompts when GitHub is ahead of the store.
-      const manifest = chrome?.runtime?.getManifest?.();
-
-      // For Safari: only skip update check if the feature is disabled (default)
-      // If shouldShowSafariUpdateReminder() returns true, allow update checks
-      if (isSafari() && !shouldShowSafariUpdateReminder()) {
-        return;
-      }
-
-      // For other browsers: skip if they have update_url (store installation)
-      if (!isSafari() && getManifestUpdateUrl(manifest)) {
-        return;
-      }
-
-      try {
-        const cache = await browser.storage.local.get(LATEST_VERSION_CACHE_KEY);
-        const now = Date.now();
-
-        const cachedEntry = cache?.[LATEST_VERSION_CACHE_KEY];
-        let latest = getCachedLatestVersion(cachedEntry, now, LATEST_VERSION_MAX_AGE);
-        let dmgUrl: string | null = null;
-
-        if (latest && isSafari()) {
-          // Try to read cached DMG URL
-          if (
-            typeof cachedEntry === 'object' &&
-            cachedEntry !== null &&
-            'dmgUrl' in cachedEntry &&
-            typeof (cachedEntry as Record<string, unknown>).dmgUrl === 'string'
-          ) {
-            dmgUrl = (cachedEntry as Record<string, unknown>).dmgUrl as string;
-          }
-          // If DMG URL was not cached, re-fetch — but respect a 30 min cooldown
-          // to avoid hitting GitHub API rate limits
-          if (
-            !dmgUrl &&
-            typeof cachedEntry === 'object' &&
-            cachedEntry !== null &&
-            'fetchedAt' in cachedEntry &&
-            typeof (cachedEntry as Record<string, unknown>).fetchedAt === 'number' &&
-            now - ((cachedEntry as Record<string, unknown>).fetchedAt as number) >=
-              SAFARI_DMG_RETRY_AGE
-          ) {
-            latest = null;
-          }
-        }
-
-        if (!latest) {
-          const resp = await fetch(
-            'https://api.github.com/repos/Nagi-ovo/gemini-voyager/releases/latest',
-            {
-              headers: { Accept: 'application/vnd.github+json' },
-            },
-          );
-
-          if (!resp.ok) {
-            throw new Error(`HTTP ${resp.status}`);
-          }
-
-          const data: unknown = await resp.json();
-          const candidate = extractLatestReleaseVersion(data);
-
-          if (candidate) {
-            latest = candidate;
-            const isSafariFetch = isSafari();
-            if (isSafariFetch) {
-              dmgUrl = extractDmgDownloadUrl(data);
-            }
-            await browser.storage.local.set({
-              [LATEST_VERSION_CACHE_KEY]: {
-                version: candidate,
-                fetchedAt: now,
-                ...(isSafariFetch ? { dmgUrl } : {}),
-              },
-            });
-          }
-        }
-
-        if (cancelled || !latest) return;
-
-        setLatestVersion(latest);
-        if (isSafari()) {
-          setSafariDmgUrl(dmgUrl);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          console.warn('[Gemini Voyager] Failed to check latest version:', error);
-        }
-      }
-    };
-
-    fetchLatestVersion();
-
-    return () => {
-      cancelled = true;
-    };
+    // Hardened: disabled remote version checks to prevent network requests
   }, [extVersion]);
 
   useEffect(() => {

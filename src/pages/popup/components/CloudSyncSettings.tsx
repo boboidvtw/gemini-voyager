@@ -101,6 +101,7 @@ export function CloudSyncSettings({ sourceTabId }: CloudSyncSettingsProps = {}) 
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadMode, setDownloadMode] = useState<DownloadMode | null>(null);
   const [platform, setPlatform] = useState<SyncPlatform>('gemini');
+  const [customClientId, setCustomClientId] = useState<string>('');
 
   const getBaseFolderStorageKey = useCallback(
     (targetPlatform: SyncPlatform) =>
@@ -243,9 +244,30 @@ export function CloudSyncSettings({ sourceTabId }: CloudSyncSettingsProps = {}) 
       setPlatform(detected);
       console.log('[CloudSyncSettings] Detected platform:', detected);
     };
+    const fetchClientId = async () => {
+      try {
+        const result = await chrome.storage.local.get(StorageKeys.GOOGLE_CLIENT_ID);
+        if (result?.[StorageKeys.GOOGLE_CLIENT_ID]) {
+          setCustomClientId(result[StorageKeys.GOOGLE_CLIENT_ID] as string);
+        }
+      } catch (error) {
+        console.error('[CloudSyncSettings] Failed to get custom Client ID:', error);
+      }
+    };
     fetchState();
     initPlatform();
+    fetchClientId();
   }, [detectPlatform]);
+ 
+  const handleSaveClientId = useCallback(async (value: string) => {
+    try {
+      await chrome.storage.local.set({ [StorageKeys.GOOGLE_CLIENT_ID]: value.trim() });
+      setStatusMessage({ text: t('pm_saved') || 'Saved', kind: 'ok' });
+    } catch (error) {
+      console.error('[CloudSyncSettings] Failed to save custom Client ID:', error);
+      setStatusMessage({ text: 'Failed to save Client ID', kind: 'err' });
+    }
+  }, [t]);
 
   // Format timestamp for display
   const formatLastSync = useCallback(
@@ -761,6 +783,29 @@ export function CloudSyncSettings({ sourceTabId }: CloudSyncSettingsProps = {}) 
         {/* Sync Actions - Only show if not disabled */}
         {syncState.mode !== 'disabled' && (
           <>
+            {/* Custom Google Drive Client ID */}
+            <div>
+              <Label className="mb-2 block text-sm font-medium">Google Drive Client ID</Label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={customClientId}
+                  onChange={(e) => setCustomClientId(e.target.value)}
+                  onBlur={(e) => handleSaveClientId(e.target.value)}
+                  placeholder="YOUR_CLIENT_ID.apps.googleusercontent.com"
+                  className="border-input placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 flex-1 rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 px-3 text-xs"
+                  onClick={() => handleSaveClientId(customClientId)}
+                >
+                  {t('pm_save') || 'Save'}
+                </Button>
+              </div>
+            </div>
+
             {/* Upload/Download Buttons */}
             <div className="grid gap-2">
               {/* Upload Button (Local → Drive) */}

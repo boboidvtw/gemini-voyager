@@ -390,7 +390,10 @@ describe('FolderManager — observer batching (issue #678)', () => {
       expect(spy).not.toHaveBeenCalled();
       expect(typed.enhancementQueue.size).toBe(2);
 
-      typed.drainEnhancementQueue();
+      typed.drainEnhancementQueue({
+        didTimeout: false,
+        timeRemaining: () => 50,
+      } as unknown as IdleDeadline);
 
       expect(spy).toHaveBeenCalledTimes(2);
       expect(typed.enhancementQueue.size).toBe(0);

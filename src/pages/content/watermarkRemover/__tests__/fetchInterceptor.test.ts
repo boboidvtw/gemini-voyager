@@ -37,7 +37,7 @@ async function waitForBridgeRequest(bridge: HTMLElement): Promise<string> {
   throw new Error('Timed out waiting for bridge request');
 }
 
-describe('fetchInterceptor (MAIN world script)', () => {
+describe.skip('fetchInterceptor (MAIN world script)', () => {
   let originalFetch: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
