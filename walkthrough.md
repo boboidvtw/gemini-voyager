@@ -7,8 +7,8 @@
 ## 🛠️ 驗證方法與測試環境
 
 1. **自動化測試框架**：使用 Playwright (Chromium v1219 乾淨沙盒環境) 進行完全隔離的載入與互動測試。
-2. **側載目標產物**：[dist_chrome/](file:///Users/liyungchih/.gemini/antigravity-ide/scratch/gemini-voyager/dist_chrome) 
-3. **測試與稽核腳本**：[automated_audit.js](file:///Users/liyungchih/.gemini/antigravity-ide/scratch/gemini-voyager/scripts/automated_audit.js) 
+2. **側載目標產物**：[dist_chrome/](file:///Users/liyungchih/.gemini/antigravity-ide/scratch/gemini-voyager/dist_chrome)
+3. **測試與稽核腳本**：[automated_audit.js](file:///Users/liyungchih/.gemini/antigravity-ide/scratch/gemini-voyager/scripts/automated_audit.js)
 4. **驗證步驟**：
    - 啟動內載該 Extension 的 Chromium 瀏覽器實例。
    - 優先導航至 `https://gemini.google.com/`，藉由網域規則與 content script 通訊喚醒 Extension Service Worker (MV3 background script)。
@@ -21,18 +21,20 @@
 
 ## 📊 網路流量審查數據 (Network Audit Metrics)
 
-| 指標 (Metric) | 數據 (Value) | 安全狀態 (Status) | 備註 (Notes) |
-| :--- | :--- | :--- | :--- |
-| **總網路請求數** | 245 | 🟢 安全 | 包含頁面與 Extension 資源載入 |
-| **本機與擴充內部請求** | 239 | 🟢 安全 | `chrome-extension://*` 與 `data:*` |
-| **外部網域請求數** | 6 | 🟢 安全 | 僅限於 `gemini.google.com` 本身發起 |
-| **Extension Telemetry 請求** | 0 | 🟢 安全 | 無任何來自擴充功能的外部傳輸 |
-| **異常/可疑請求** | 0 | 🟢 安全 | 公告、市場、GitHub 版本更新皆為 0 請求 |
+| 指標 (Metric)                | 數據 (Value) | 安全狀態 (Status) | 備註 (Notes)                           |
+| :--------------------------- | :----------- | :---------------- | :------------------------------------- |
+| **總網路請求數**             | 245          | 🟢 安全           | 包含頁面與 Extension 資源載入          |
+| **本機與擴充內部請求**       | 239          | 🟢 安全           | `chrome-extension://*` 與 `data:*`     |
+| **外部網域請求數**           | 6            | 🟢 安全           | 僅限於 `gemini.google.com` 本身發起    |
+| **Extension Telemetry 請求** | 0            | 🟢 安全           | 無任何來自擴充功能的外部傳輸           |
+| **異常/可疑請求**            | 0            | 🟢 安全           | 公告、市場、GitHub 版本更新皆為 0 請求 |
 
 ### 🔍 外部請求明細分析
+
 稽核日誌中攔截到的 6 個外部請求，全部是由 `gemini.google.com` 官方網頁在載入時自身發起的 Google 官方服務（如 Google Analytics、Google Tag Manager 及 Ads Audiences 收集服務），不包含任何由 Extension (iifacdnjakkhjjiengaffnegbndgingi) 程式碼所觸發的請求。
 
 這證實了我們的安全加固非常成功：
+
 - **公告系統遠端連線**：**已完全截斷 (0 請求)**。
 - **插件市場遠端連線**：**已完全截斷 (0 請求)**。
 - **GitHub 自動版本檢查**：**已完全截斷 (0 請求)**。
@@ -43,13 +45,13 @@
 
 以下是自動化測試在運行期間擷取的核心 UI 渲染畫面：
 
-````carousel
+```carousel
 ![Popup 彈出介面狀態](/Users/liyungchih/.gemini/antigravity-ide/brain/2346190c-39f6-4b15-998d-84760e872118/popup.png)
 <!-- slide -->
 ![Options 設定頁面狀態](/Users/liyungchih/.gemini/antigravity-ide/brain/2346190c-39f6-4b15-998d-84760e872118/options.png)
 <!-- slide -->
 ![Google Gemini 注入狀態](/Users/liyungchih/.gemini/antigravity-ide/brain/2346190c-39f6-4b15-998d-84760e872118/gemini.png)
-````
+```
 
 ---
 

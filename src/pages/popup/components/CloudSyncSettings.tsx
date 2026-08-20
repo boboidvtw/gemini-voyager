@@ -258,16 +258,19 @@ export function CloudSyncSettings({ sourceTabId }: CloudSyncSettingsProps = {}) 
     initPlatform();
     fetchClientId();
   }, [detectPlatform]);
- 
-  const handleSaveClientId = useCallback(async (value: string) => {
-    try {
-      await chrome.storage.local.set({ [StorageKeys.GOOGLE_CLIENT_ID]: value.trim() });
-      setStatusMessage({ text: t('pm_saved') || 'Saved', kind: 'ok' });
-    } catch (error) {
-      console.error('[CloudSyncSettings] Failed to save custom Client ID:', error);
-      setStatusMessage({ text: 'Failed to save Client ID', kind: 'err' });
-    }
-  }, [t]);
+
+  const handleSaveClientId = useCallback(
+    async (value: string) => {
+      try {
+        await chrome.storage.local.set({ [StorageKeys.GOOGLE_CLIENT_ID]: value.trim() });
+        setStatusMessage({ text: t('pm_saved') || 'Saved', kind: 'ok' });
+      } catch (error) {
+        console.error('[CloudSyncSettings] Failed to save custom Client ID:', error);
+        setStatusMessage({ text: 'Failed to save Client ID', kind: 'err' });
+      }
+    },
+    [t],
+  );
 
   // Format timestamp for display
   const formatLastSync = useCallback(

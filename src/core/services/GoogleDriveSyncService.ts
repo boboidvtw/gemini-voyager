@@ -9,6 +9,7 @@
  * - gemini-voyager-prompts.json
  * - gemini-voyager-starred.json
  */
+import { StorageKeys } from '@/core/types/common';
 import type { FolderData } from '@/core/types/folder';
 import type {
   FolderExportPayload,
@@ -27,7 +28,6 @@ import type {
   TimelineHierarchyExportPayload,
 } from '@/core/types/sync';
 import { DEFAULT_SYNC_STATE } from '@/core/types/sync';
-import { StorageKeys } from '@/core/types/common';
 import { isBrave } from '@/core/utils/browser';
 import { hashString } from '@/core/utils/hash';
 import { EXTENSION_VERSION } from '@/core/utils/version';
@@ -588,7 +588,9 @@ export class GoogleDriveSyncService {
     const scopes = manifest.oauth2?.scopes?.join(' ');
 
     if (!clientId || !scopes || clientId === 'YOUR_OAUTH_CLIENT_ID') {
-      console.error('[GoogleDriveSyncService] Missing oauth2 config or custom Client ID is placeholder');
+      console.error(
+        '[GoogleDriveSyncService] Missing oauth2 config or custom Client ID is placeholder',
+      );
       return null;
     }
 

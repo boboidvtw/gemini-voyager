@@ -1,6 +1,6 @@
-import { chromium } from 'playwright';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import { chromium } from 'playwright';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,7 +28,7 @@ async function run() {
       `--disable-extensions-except=${distDir}`,
       `--load-extension=${distDir}`,
       '--no-first-run',
-      '--no-default-browser-check'
+      '--no-default-browser-check',
     ],
   });
 
@@ -60,7 +60,7 @@ async function run() {
       console.log(`Extension ID found from Background Page: ${extensionId}`);
       break;
     }
-    
+
     // Also try listing pages to see if any extension page is open
     const pages = browserContext.pages();
     for (const p of pages) {
@@ -71,16 +71,16 @@ async function run() {
       }
     }
     if (extensionId) break;
-    
-    await new Promise(r => setTimeout(r, 500));
+
+    await new Promise((r) => setTimeout(r, 500));
   }
 
   // Setup page-level monitoring helpers
   const setupPageMonitoring = (page, pageName) => {
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       consoleLogs.push({ page: pageName, type: msg.type(), text: msg.text() });
     });
-    page.on('pageerror', err => {
+    page.on('pageerror', (err) => {
       console.log(`[Error][${pageName}] ${err.message}`);
       pageErrors.push({ page: pageName, error: err.stack || err.message });
     });
@@ -90,13 +90,16 @@ async function run() {
   console.log('Navigating to Google Gemini to wake up Extension...');
   const geminiPage = await browserContext.newPage();
   setupPageMonitoring(geminiPage, 'Gemini');
-  geminiPage.on('dialog', async dialog => {
+  geminiPage.on('dialog', async (dialog) => {
     console.log(`[Dialog] ${dialog.type()}: ${dialog.message()}`);
     await dialog.dismiss();
   });
 
   try {
-    await geminiPage.goto('https://gemini.google.com/', { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await geminiPage.goto('https://gemini.google.com/', {
+      waitUntil: 'domcontentloaded',
+      timeout: 15000,
+    });
     console.log('Gemini page loaded. Waiting for Extension to initialize...');
     await geminiPage.waitForTimeout(4000);
   } catch (e) {
@@ -129,17 +132,20 @@ async function run() {
         }
       }
       if (detectedExtensionId) break;
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 500));
     }
   }
 
   if (!detectedExtensionId) {
     console.error('CRITICAL: Could not determine Extension ID dynamically even after Gemini load!');
     const pages = browserContext.pages();
-    console.log('Active pages URLs:', pages.map(p => p.url()));
+    console.log(
+      'Active pages URLs:',
+      pages.map((p) => p.url()),
+    );
   } else {
     extensionId = detectedExtensionId;
-    
+
     // 3. Now audit Popup Page
     console.log('Navigating to Popup Page...');
     const popupPage = await browserContext.newPage();
@@ -175,7 +181,9 @@ async function run() {
     await geminiPage.screenshot({ path: path.join(screenshotDir, 'gemini.png') });
     console.log('Gemini Page final screenshot captured.');
   } catch (e) {
-    console.log(`Failed to capture final Gemini screenshot: ${e.message}. Capturing screenshot anyway.`);
+    console.log(
+      `Failed to capture final Gemini screenshot: ${e.message}. Capturing screenshot anyway.`,
+    );
     await geminiPage.screenshot({ path: path.join(screenshotDir, 'gemini_error.png') });
   }
 
@@ -199,7 +207,7 @@ async function run() {
     'googleapis.com',
     'chrome-extension:',
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
   ];
 
   const auditReport = {
@@ -222,16 +230,16 @@ async function run() {
       }
       const parsedUrl = new URL(urlStr);
       const host = parsedUrl.host;
-      const isAllowed = allowedHosts.some(allowed => host.endsWith(allowed) || host === allowed);
-      
+      const isAllowed = allowedHosts.some((allowed) => host.endsWith(allowed) || host === allowed);
+
       if (!isAllowed) {
         auditReport.externalRequests.push(req);
         auditReport.blockedRequestsCount++;
         // Check if it matches known disabled telemetry/external endpoints
         if (
-          host.includes('github') || 
-          host.includes('marketplace') || 
-          host.includes('announcements') || 
+          host.includes('github') ||
+          host.includes('marketplace') ||
+          host.includes('announcements') ||
           host.includes('analytics') ||
           host.includes('telemetry')
         ) {
@@ -254,7 +262,7 @@ async function run() {
   console.log(`External/Blocked Requests: ${auditReport.blockedRequestsCount}`);
   console.log(`Suspicious Requests: ${auditReport.suspiciousRequests.length}`);
   console.log(`Console Errors: ${pageErrors.length}`);
-  
+
   if (auditReport.suspiciousRequests.length > 0) {
     console.log('⚠️ WARNING: Suspicious requests detected!');
   } else {

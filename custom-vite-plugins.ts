@@ -1,7 +1,6 @@
 import fs from 'fs';
 import { resolve } from 'path';
-import type { NormalizedInputOptions, NormalizedOutputOptions } from 'rollup';
-import type { PluginOption } from 'vite';
+import type { PluginOption, Rollup } from 'vite';
 
 const FIREFOX_OUT_DIR_MARKER = 'dist_firefox';
 const CHANGELOG_PROMO_BANNERS = [
@@ -19,7 +18,7 @@ export function stripDevIcons(isDev: boolean) {
     resolveId(source: string) {
       return source === 'virtual-module' ? source : null;
     },
-    renderStart(outputOptions: NormalizedOutputOptions, _inputOptions: NormalizedInputOptions) {
+    renderStart(outputOptions: Rollup.NormalizedOutputOptions, _inputOptions: Rollup.NormalizedInputOptions) {
       const outDir = outputOptions.dir ?? '';
       const isFirefoxBuild = outDir.includes(FIREFOX_OUT_DIR_MARKER);
 
@@ -44,7 +43,7 @@ export function stripDevIcons(isDev: boolean) {
         console.log(`Deleted assets/ directory from prod build`),
       );
     },
-    writeBundle(outputOptions: NormalizedOutputOptions) {
+    writeBundle(outputOptions: Rollup.NormalizedOutputOptions) {
       const outDir = outputOptions.dir ?? '';
       // Remove .vite directory (Vite's internal manifest, not needed for extension)
       const viteDir = resolve(outDir, '.vite');
