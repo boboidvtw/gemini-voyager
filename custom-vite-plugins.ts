@@ -18,7 +18,10 @@ export function stripDevIcons(isDev: boolean) {
     resolveId(source: string) {
       return source === 'virtual-module' ? source : null;
     },
-    renderStart(outputOptions: Rollup.NormalizedOutputOptions, _inputOptions: Rollup.NormalizedInputOptions) {
+    renderStart(
+      outputOptions: Rollup.NormalizedOutputOptions,
+      _inputOptions: Rollup.NormalizedInputOptions,
+    ) {
       const outDir = outputOptions.dir ?? '';
       const isFirefoxBuild = outDir.includes(FIREFOX_OUT_DIR_MARKER);
 
