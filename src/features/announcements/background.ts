@@ -15,8 +15,7 @@ import type {
 } from './types';
 import { validateAnnouncementFeed } from './validate';
 
-export const DEFAULT_ANNOUNCEMENTS_URL =
-  'https://raw.githubusercontent.com/voyager-crew/voyager/main/docs/public/announcements.json';
+export const DEFAULT_ANNOUNCEMENTS_URL = '';
 export const REMOTE_ANNOUNCEMENTS_ALARM_NAME = 'gv-remote-announcements-check';
 
 const CHECK_INTERVAL_MINUTES = 6 * 60;

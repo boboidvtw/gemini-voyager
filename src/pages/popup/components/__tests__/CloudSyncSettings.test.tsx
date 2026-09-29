@@ -996,4 +996,55 @@ describe('CloudSyncSettings auth flow', () => {
       }),
     );
   });
+
+  it('loads and saves custom Google Drive client ID in local storage', async () => {
+    const sendMessageMock = vi.fn().mockImplementation((message: { type?: string }) => {
+      if (message.type === 'gv.sync.getState') {
+        return Promise.resolve({ ok: true, state: baseState });
+      }
+      return Promise.resolve({ ok: true });
+    });
+    const chromeMock = createChromeMock(sendMessageMock);
+    (chromeMock.storage.local.get as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      [StorageKeys.GOOGLE_CLIENT_ID]: 'custom-123.apps.googleusercontent.com',
+    });
+    (globalThis as { chrome: MockedChrome }).chrome = chromeMock;
+
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<CloudSyncSettings />);
+    });
+    await flushMicrotasks();
+
+    const input = container.querySelector(
+      'input[placeholder="YOUR_CLIENT_ID.apps.googleusercontent.com"]',
+    ) as HTMLInputElement | null;
+    expect(input).toBeTruthy();
+    expect(input?.value).toBe('custom-123.apps.googleusercontent.com');
+
+    const saveBtn = input?.parentElement?.querySelector('button');
+    expect(saveBtn).toBeTruthy();
+
+    await act(async () => {
+      if (input) {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          'value',
+        )?.set;
+        nativeSetter?.call(input, 'updated-456.apps.googleusercontent.com');
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      saveBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    const localSetMock = chromeMock.storage.local.set as unknown as ReturnType<typeof vi.fn>;
+    expect(localSetMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [StorageKeys.GOOGLE_CLIENT_ID]: 'updated-456.apps.googleusercontent.com',
+      }),
+    );
+  });
 });

@@ -311,6 +311,9 @@ export const StorageKeys = {
   CONTEXT_SYNC_ENABLED: 'contextSyncEnabled',
   CONTEXT_SYNC_PORT: 'contextSyncPort',
 
+  // Google Drive custom OAuth Client ID
+  GOOGLE_CLIENT_ID: 'googleClientId',
+
   // Folder as Project
   FOLDER_PROJECT_ENABLED: 'gvFolderProjectEnabled',
   FOLDER_PROJECT_PENDING_FOLDER_ID: 'gvFolderProjectPendingFolderId',

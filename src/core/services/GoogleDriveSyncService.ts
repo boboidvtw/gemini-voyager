@@ -1,3 +1,4 @@
+import { runGoogleWebAuthFlow } from '@/core/services/googleOAuthWebFlow';
 /**
  * Google Drive Sync Service
  *
@@ -12,7 +13,7 @@
  * - gemini-voyager-starred.json
  * - gemini-voyager-highlights.json (account-scoped; independent from legacy sync data)
  */
-import { runGoogleWebAuthFlow } from '@/core/services/googleOAuthWebFlow';
+import { StorageKeys } from '@/core/types/common';
 import type { FolderData } from '@/core/types/folder';
 import { isHighlightExportPayloadV1 } from '@/core/types/highlight';
 import type {
@@ -858,7 +859,18 @@ export class GoogleDriveSyncService {
 
   private async getTokenFromLegacyWebAuthFlow(): Promise<string | null> {
     const manifest = chrome.runtime.getManifest();
-    const clientId = manifest.oauth2?.client_id;
+    let clientId = manifest.oauth2?.client_id;
+
+    // Check if custom Client ID is stored
+    try {
+      const result = await chrome.storage.local.get(StorageKeys.GOOGLE_CLIENT_ID);
+      if (result?.[StorageKeys.GOOGLE_CLIENT_ID]) {
+        clientId = result[StorageKeys.GOOGLE_CLIENT_ID] as string;
+      }
+    } catch (e) {
+      console.warn('[GoogleDriveSyncService] Failed to read custom client ID from storage:', e);
+    }
+
     const scopes = manifest.oauth2?.scopes?.join(' ');
 
     if (!clientId || !scopes) {
@@ -924,10 +936,20 @@ export class GoogleDriveSyncService {
       return this.accessToken;
     }
 
+    // Check if custom Client ID is configured. If so, bypass getAuthToken.
+    let hasCustomClientId = false;
+    try {
+      const result = await chrome.storage.local.get(StorageKeys.GOOGLE_CLIENT_ID);
+      if (result?.[StorageKeys.GOOGLE_CLIENT_ID]) {
+        hasCustomClientId = true;
+      }
+    } catch {}
+
     // Brave supports the identity API but chrome.identity.getAuthToken shows
     // an "Access blocked" error popup before failing, causing user confusion.
     // Skip it entirely on Brave and go directly to launchWebAuthFlow.
-    const supportsIdentityApi = !!chrome.identity?.getAuthToken && !isBrave();
+    // Also skip if a custom Client ID is configured (as getAuthToken only uses manifest Client ID).
+    const supportsIdentityApi = !hasCustomClientId && !!chrome.identity?.getAuthToken && !isBrave();
     if (supportsIdentityApi) {
       const identityResult = await this.getTokenFromIdentity(interactive);
       if (identityResult.token) {
