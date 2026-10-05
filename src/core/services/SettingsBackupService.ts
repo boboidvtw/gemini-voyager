@@ -209,6 +209,11 @@ export const NON_SETTINGS_BACKUP_POLICIES = {
     disposition: 'device-local',
     reason: 'Cloud authorization and opt-in are device-specific.',
   },
+  [StorageKeys.GOOGLE_CLIENT_ID]: {
+    storage: 'local',
+    disposition: 'device-local',
+    reason: 'Custom OAuth Client ID is installation-specific credentials configuration.',
+  },
   [StorageKeys.HIGHLIGHT_DEVICE_ID]: {
     storage: 'local',
     disposition: 'device-local',
